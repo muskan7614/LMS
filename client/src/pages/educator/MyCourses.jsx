@@ -1,22 +1,36 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../../context/AppContext'
 import Loading from '../../components/student/Loading'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const MyCourses = () => {
 
-  const {currency, allCourses}=useContext(AppContext)
+  const {currency, backendUrl, getToken ,isEducator }=useContext(AppContext)
 
   const[courses, setCourses] = useState(null)
 
   const fetchEducatorCourses = async()=>{
-    setCourses(allCourses)
+    try {
+      const token = await getToken()
+      const {data} = await axios.get(backendUrl + '/api/educator/courses', {headers: 
+        {Authorization: `Bearer ${token}`}})
+
+        data.success && setCourses(data.courses)
+
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
 
   useEffect(()=>{
-    fetchEducatorCourses()
-  },[])
+    if(isEducator){
+      fetchEducatorCourses()
+    }
+    
+  },[isEducator])
 
-  return courses ?(
+  return courses ? (
     <div className='h-screen flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0'>
       <div className='w-full'>
         <h2 className='pb-4 text-lg font-medium'>My Courses</h2>
@@ -36,7 +50,7 @@ const MyCourses = () => {
                 <tr key={course._id} className='border-b border-gray-500/20'>
                   <td className='md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate'>
                     <img src={course.courseThumbnail} alt="Course Image" className='w-16'/>
-                    <span className='truncate hidden md:block'>{course.courseThumbnail}</span>
+                    <span className='truncate hidden md:block'>{course.courseTitle}</span>
                   </td>
                   <td className='px-4 py-3'>{currency} {Math.floor(course.enrolledStudents.length * 
                     (course.coursePrice - course.discount * course.coursePrice /100)

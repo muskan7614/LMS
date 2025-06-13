@@ -17,7 +17,7 @@ export const getCourseId = async(req, res)=>{
     try {
         const courseData = await Course.findById(id).populate({path:'educator'})
 
-        // Remove lectureUrl if iisPreview is false
+        // Remove lectureUrl if isPreview is false
         courseData.courseContent.forEach(chapter =>{
             chapter.chapterContent.forEach(lecture=>{
                 if(!lecture.isPreviewFree){
